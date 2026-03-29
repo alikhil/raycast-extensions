@@ -375,6 +375,13 @@ function sortProjectsHierarchically(projects: Project[]): Project[] {
     addProjectWithChildren(project, 0);
   }
 
+  // Fallback: include any unvisited projects at root level
+  for (const project of projects) {
+    if (!visited.has(project.id)) {
+      result.push({ ...project, depth: 0 });
+    }
+  }
+
   return result;
 }
 
