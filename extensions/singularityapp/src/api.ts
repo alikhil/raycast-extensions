@@ -329,11 +329,15 @@ export async function getProjects(): Promise<Project[]> {
 
 /** Sorts projects hierarchically: parent followed by its children (recursively), then next sibling */
 function sortProjectsHierarchically(projects: Project[]): Project[] {
+  // Build a set of valid project IDs for orphan detection
+  const projectIds = new Set(projects.map((p) => p.id));
+
   // Build a map of parent -> children
   const childrenMap = new Map<string | undefined, Project[]>();
 
   for (const project of projects) {
-    const parentId = project.parent || undefined;
+    // Treat as root if no parent, or if parent ID doesn't exist (orphan)
+    const parentId = project.parent && projectIds.has(project.parent) ? project.parent : undefined;
     if (!childrenMap.has(parentId)) {
       childrenMap.set(parentId, []);
     }
@@ -351,8 +355,13 @@ function sortProjectsHierarchically(projects: Project[]): Project[] {
 
   // Recursively flatten the tree: parent, then all its children (depth-first)
   const result: Project[] = [];
+  const visited = new Set<string>(); // Cycle detection
 
   function addProjectWithChildren(project: Project, depth: number) {
+    // Guard against cycles
+    if (visited.has(project.id)) return;
+    visited.add(project.id);
+
     result.push({ ...project, depth });
     const children = childrenMap.get(project.id) || [];
     for (const child of children) {
