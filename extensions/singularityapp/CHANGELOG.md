@@ -1,6 +1,6 @@
 # SingularityApp Changelog
 
-## [0.3.0] - {PR_MERGE_DATE}
+## [0.3.0] - 2026-03-30
 
 - Added hierarchical project ordering with visual indentation
 
